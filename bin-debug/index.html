@@ -1,0 +1,38 @@
+<html>
+<head>
+<script src='swfobject.js'></script>
+<script>
+    function getFlashMovie(movieName) {
+		var isIE = navigator.appName.indexOf("Microsoft") != -1;
+		return (isIE) ? window[movieName] : document[movieName];
+    }
+	
+	window.onload = function() {
+		var params = { allowScriptAccess: 'always' }
+		swfobject.embedSWF('Conductor.swf', 'cat-module', 330, 260, '10.0.0', null, {}, params)
+	}
+	
+	function callToActionscript(str)
+    {
+		var player = document.getElementById("cat-module");
+		player.sendToActionscript(str);
+		//getFlashMovie("Conductor.swf").sendToActionscript(str);
+		
+    }
+</script>
+
+</head>
+	<body>
+		<div id="cat-module">
+		<!--
+		<object width="320" height="240" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
+		codebase="http://fpdownload.macromedia.com/
+		pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" id="player">
+			<param name="SRC" value="bookmark.swf">
+			<embed src="Conductor.swf" width="320" height="240" allowScriptAccess="always"></embed>
+		</object> 
+		-->
+		<a onclick="callToActionscript('test')" href="#">Actionscript</a>
+		</div>
+	</body>
+</html>

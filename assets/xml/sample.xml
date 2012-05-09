@@ -1,0 +1,16 @@
+<scene>
+
+	<description text="Daft punk: End of line"/>
+
+	<trackinfo>
+		<trackurl text="endofline.mp3"/>
+		<displayinfo text="Daft punk: End of line"/>
+		
+		<timesignature bpmeasure="4" bpminute="60" />
+		
+	</trackinfo>
+
+	
+	
+	
+</scene>
