@@ -16,8 +16,7 @@ package com.time
 	 * 
 	 * @author Anthony Erlinger
 	 */
-	public class PreciseTimer implements IEventDispatcher
-	{
+	public class PreciseTimer implements IEventDispatcher {
 		
 		private var mEventDispatcher:EventDispatcher;	// Event storage n' shit.
 		
@@ -34,7 +33,6 @@ package com.time
 		private var lastEventTime:Number;
 		
 		
-		
 		/**
 		 * Creates a new instance of a precise timer.
 		 *
@@ -42,8 +40,7 @@ package com.time
 		 *  @param tickInterval Length in milliseconds of each interval
 		 *	@return void
 		 */
-		public function PreciseTimer(mParent:MovieClip, tickInterval:Number)
-		{
+		public function PreciseTimer(mParent:MovieClip, tickInterval:Number) {
 			this.mIsRunning = false;
 			this.mTickIntervalInMilliseconds = tickInterval;
 			this.mSecondsElapsed = 0;
@@ -59,8 +56,7 @@ package com.time
 		
 		/** Starts this timer.
 		 */
-		public function start(): void
-		{
+		public function start(): void {
 			// Remove an existing interval
 			if (this.mIsRunning) {
 				this.pause(true);
@@ -79,8 +75,7 @@ package com.time
 		 *	@param Void
 		 *	@return Void
 		 */
-		public function pause(isPaused:Boolean):void
-		{
+		public function pause(isPaused:Boolean):void {
 			this.mIsRunning = !isPaused;
 		}
 		
@@ -91,8 +86,7 @@ package com.time
 		 *	@param Void
 		 *	@return Void
 		 */
-		public function reset():void
-		{
+		public function reset():void {
 			this.pause(true);
 			this.mSecondsElapsed = 0;
 		}
@@ -104,8 +98,7 @@ package com.time
 		 *	@param void
 		 *	@return Number of seconds elapsed since timer was started.
 		 */
-		public function getTotalSecondsElapsed() : Number
-		{
+		public function getTotalSecondsElapsed() : Number {
 			return this.mSecondsElapsed
 		}
 		
@@ -207,28 +200,23 @@ package com.time
 		// Event handling:
 		///////////////////////////////////////////
 		
-		public function addEventListener(type:String, listener:Function, useCapture:Boolean=false, priority:int=0, useWeakReference:Boolean=false):void
-		{
+		public function addEventListener(type:String, listener:Function, useCapture:Boolean=false, priority:int=0, useWeakReference:Boolean=false):void {
 			mEventDispatcher.addEventListener(type, listener, useCapture, priority);
 		}
 		
-		public function dispatchEvent(event:Event):Boolean
-		{
+		public function dispatchEvent(event:Event):Boolean {
 			return mEventDispatcher.dispatchEvent(event);
 		}
 		
-		public function hasEventListener(type:String):Boolean
-		{
+		public function hasEventListener(type:String):Boolean {
 			return mEventDispatcher.hasEventListener(type);
 		}
 		
-		public function removeEventListener(type:String, listener:Function, useCapture:Boolean=false):void
-		{
+		public function removeEventListener(type:String, listener:Function, useCapture:Boolean=false):void {
 			mEventDispatcher.removeEventListener(type, listener, useCapture);
 		}
 		
-		public function willTrigger(type:String):Boolean
-		{
+		public function willTrigger(type:String):Boolean {
 			return mEventDispatcher.willTrigger(type);
 		}
 		

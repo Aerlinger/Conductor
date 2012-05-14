@@ -7,6 +7,10 @@ package com.sound
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	
+	/** Loads and plays back an .mp3 file from a URL 
+	 * 
+	 * @author Anthony Erlinger
+	 * */
 	public class MusicPlayer {
 		
 		private var mURL:String = "";
@@ -20,8 +24,7 @@ package com.sound
 		private var mBuffer:ByteArray = new ByteArray();
 		
 		
-		public function MusicPlayer(URL:String="")
-		{
+		public function MusicPlayer(URL:String="") {
 			loadMusic(URL);
 
 			var read:uint;

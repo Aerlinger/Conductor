@@ -17,8 +17,7 @@
 	 * 
 	 * @author Anthony Erlinger
 	 * */
-	public class Metronome extends Sprite
-	{
+	public class Metronome extends Sprite {
 
 		private var BeatOnsetShape:Shape;
 		private var SubBeatShape:Shape;
@@ -40,20 +39,14 @@
 		private var mTimeSignatureTxt:TextField;
 		private var mTimerTxt:TextField;
 		
-		public function moveMouth(duration:Number) {
-			var MouthMovement:Tween = new Tween(Conductor.getInstance().KittyMouthLoader, "y", Strong.easeInOut, Conductor.getInstance().KittyMouthLoader.y, Conductor.getInstance().KittyMouthLoader.y+20, duration, true);
-			MouthMovement.yoyo();
-		}
 		
-		public function Metronome( xPos:Number, yPos:Number, beatsPerMeasure:Number )
-		{
+		
+		
+		public function Metronome( xPos:Number, yPos:Number, beatsPerMeasure:Number ) {
 			
 			// Create circles which pulse at the onset of every beat, and measure (downbeat).
 			BeatOnsetShape 	= createDownBeatShape(xPos,yPos);
 			SubBeatShape 	= createSubBeatShape(xPos,yPos);
-			
-			
-			//DownbeatTweenScaleX = new Tween(Conductor.getInstance().KittyBackground, "rotation", Strong.easeIn, 0, 10, .5, true);
 			
 			DownbeatTweenScaleX = new Tween(BeatOnsetShape, "scaleX", Strong.easeIn, 1, 1.1, .5, true);
 			DownbeatTweenScaleY = new Tween(BeatOnsetShape, "scaleY", Strong.easeIn, 1, 1.1, .5, true);
@@ -109,8 +102,12 @@
 			this.name = "MetronomeDefault";
 		}
 
-		private function createDownBeatShape(xPos:Number, yPos:Number) : Shape
-		{
+		public function moveMouth(duration:Number) : void {
+			var MouthMovement:Tween = new Tween(Conductor.getInstance().KittyMouthLoader, "y", Strong.easeInOut, Conductor.getInstance().KittyMouthLoader.y, Conductor.getInstance().KittyMouthLoader.y+20, duration, true);
+			MouthMovement.yoyo();
+		}
+		
+		private function createDownBeatShape(xPos:Number, yPos:Number) : Shape {
 			var BeatOnsetShape:Shape = new Shape();
 
 			BeatOnsetShape.graphics.beginFill(0xAA3311);
@@ -122,8 +119,7 @@
 			return BeatOnsetShape;
 		}
 
-		private function createSubBeatShape(xPos:Number, yPos:Number) : Shape
-		{
+		private function createSubBeatShape(xPos:Number, yPos:Number) : Shape {
 			var BeatOnsetShape:Shape = new Shape();
 
 			BeatOnsetShape.graphics.beginFill(0xCC9911);
@@ -139,8 +135,8 @@
 			mTimerTxt.text = "" + pSeconds.toFixed(2);
 		}
 		
-		public function downBeat() : void 
-		{
+		/** Called at the start of each measure */
+		public function downBeat() : void {
 			
 			DownbeatTweenScaleX.start();
 			DownbeatTweenScaleY.start();
@@ -148,8 +144,8 @@
 			mTimeSignatureTxt.text = "1/"+mNumBeatsPerMeasure;
 		}
 
-		public function subBeat( beatNum:Number ) : void
-		{
+		/** Called at the start of each beat */
+		public function subBeat( beatNum:Number ) : void {
 			SubBeatTweenScaleX.start();
 			SubBeatTweenScaleY.start();
 			mouthTween.start();
@@ -157,6 +153,7 @@
 			mTimeSignatureTxt.text = "" + beatNum + "/" + mNumBeatsPerMeasure;
 		}
 		
+		/** remove the tween when it's done so it doesn't repeat */
 		private function startBeatTweenFinish(Evt:TweenEvent) : void {
 			DownbeatTweenScaleX.removeEventListener(TweenEvent.MOTION_FINISH, startBeatTweenFinish );
 			DownbeatTweenScaleY.removeEventListener(TweenEvent.MOTION_FINISH, startBeatTweenFinish );
@@ -168,6 +165,7 @@
 			
 		}
 		
+		/** remove the tween when it's done so it doesn't repeat */
 		private function subBeatTweenFinish(Evt:TweenEvent) : void {
 			
 			Conductor.getInstance().KittyMouth.y -= 10;

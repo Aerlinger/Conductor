@@ -9,8 +9,7 @@ package com.time
 	 * in the timeline 
 	 * 
 	 * @author Anthony Erlinger*/
-	public class Keypoint
-	{
+	public class Keypoint {
 		
 		private var mStartTime:Number;
 		private var mKeypointAction:ActionNode;
@@ -20,11 +19,9 @@ package com.time
 		private var mIsStarted:Boolean = false;
 		
 		public var name:String;
+	
 		
-		
-		
-		public function Keypoint(startTime:Number, pAction:ActionNode, pTargetElement:BaseElement )
-		{
+		public function Keypoint(startTime:Number, pAction:ActionNode, pTargetElement:BaseElement ) {
 			this.mStartTime = startTime;
 			this.mKeypointAction = pAction;
 			
@@ -92,7 +89,6 @@ package com.time
 			}
 			
 			if( !mIsStarted ) {
-				
 				
 				// Start the action associated with this keypoint.
 				//mKeypointAction.start();

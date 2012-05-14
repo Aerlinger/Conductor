@@ -3,8 +3,17 @@ package com.event
 	
 	import flash.events.Event;
 	
-	public class ElementEvent extends Event
-	{
+	/** This event class is dispatched for specific Element-related events such as:
+	 * An element is added to a group
+	 * An element is removed from a group
+	 * An element is moved
+	 * An element Tween is started
+	 * An element Tween is finished
+	 * 
+	 * @author Anthony Erlinger
+	 * 
+	 */
+	public class ElementEvent extends Event {
 		
 		public static const ADD_TO_GROUP:String 		= "addToGroup";
 		public static const REMOVE_FROM_GROUP:String 	= "removeFromGroup";

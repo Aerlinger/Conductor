@@ -4,8 +4,12 @@ package com.event
 	
 	import flash.events.Event;
 
-	public class CollisionEvent extends Event
-	{
+	/**
+	 * This event is dispatched whenever a collision occurs between two elements 
+	 * 
+	 * @author Anthony Erlinger
+	 */
+	public class CollisionEvent extends Event {
 		public static const COLLIDE:String 	= "collide";
 		
 		// Stores the x and y positions of the collision
@@ -16,8 +20,7 @@ package com.event
 		private var Element1:BaseElement;
 		private var Element2:BaseElement;
 		
-		public function CollisionEvent(type:String, x:Number, y:Number, pElement1:BaseElement, pElement2:BaseElement, bubbles:Boolean=false, cancelable:Boolean=false)
-		{
+		public function CollisionEvent(type:String, x:Number, y:Number, pElement1:BaseElement, pElement2:BaseElement, bubbles:Boolean=false, cancelable:Boolean=false) {
 			super(type, bubbles, cancelable);
 			
 			this.x = x;
@@ -43,7 +46,6 @@ package com.event
 		public function getSecondElement() : BaseElement {
 			return Element2;
 		}
-		
 		
 	}
 }

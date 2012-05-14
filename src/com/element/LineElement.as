@@ -8,13 +8,13 @@ package com.element
 	import flash.filters.BlurFilter;
 	
 	
-	/** Creates a line between two points. The endpoints of a LineElement can be bound to parent objects, such 
+	/** Element representing a line between two points. The endpoints of a LineElement can be bound to parent objects, such 
 	 * that when the parent objects move, so do the endpoints of the line.
 	 * 
 	 * @author Anthony Erlinger 
 	 */
-	public class LineElement extends BaseElement
-	{
+	public class LineElement extends BaseElement {
+		
 		// First point:
 		protected var x1:Number;
 		protected var y1:Number;

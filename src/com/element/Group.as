@@ -42,8 +42,7 @@ package com.element
 		
 		
 		/** Creates a new group from a list of elements */
-		public function Group(pOriginal:Group=null, ...Elements)
-		{
+		public function Group(pOriginal:Group=null, ...Elements) {
 			super( pOriginal );
 			
 			// Groups do not have shape data by default
@@ -107,8 +106,7 @@ package com.element
 		}
 		
 		/** Returns an exact copy of this group */
-		override public function clone() : *
-		{
+		override public function clone() : * {
 			return new Group(this);
 		}
 		
@@ -246,8 +244,7 @@ package com.element
 		}
 		
 		/** Gets the bounds of this Group relative to the stage coordinates. */
-		override public function getRect(targetCoordinateSpace:DisplayObject) : Rectangle
-		{
+		override public function getRect(targetCoordinateSpace:DisplayObject) : Rectangle {
 			var Minimum:Point = new Point(targetCoordinateSpace.x, targetCoordinateSpace.y);
 			var GlobalMinimum:Point = this.localToGlobal(Minimum);
 			
@@ -276,8 +273,7 @@ package com.element
 			trace("Removed Element from group");
 		}
 		
-		override public function flower(numPetals:uint=4, durationInBeats:Number=1, radius:Number=50, useSeconds:Boolean=false) : TimelineMax
-		{
+		override public function flower(numPetals:uint=4, durationInBeats:Number=1, radius:Number=50, useSeconds:Boolean=false) : TimelineMax {
 			var FlowerTimeline:TimelineMax = new TimelineMax();
 			
 			if(useSeconds) {

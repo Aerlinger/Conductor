@@ -5,8 +5,7 @@ package com.time
 	 * 
 	 * @author Anthony Erlinger
 	 */
-	public class TimeSignatureData
-	{
+	public class TimeSignatureData {
 		
 		private var mNumBeatsPerMinute:Number;	// Number of beats per minute
 		private var mNumBeatsPerMeasure:uint;	// Beats per measure
@@ -18,8 +17,7 @@ package com.time
 		
 		
 		/** Creates a new instance of TimeData. Values cannot be changed once the variables are created. */
-		public function TimeSignatureData(pNumBeatsPerMinute:Number, pNumBeatsPerMeasure:uint, pNumMeasures:uint)
-		{
+		public function TimeSignatureData(pNumBeatsPerMinute:Number, pNumBeatsPerMeasure:uint, pNumMeasures:uint) {
 			this.mNumBeatsPerMinute 	= pNumBeatsPerMinute;
 			this.mNumBeatsPerMeasure 	= pNumBeatsPerMeasure;
 			this.mNumMeasures 			= pNumMeasures;

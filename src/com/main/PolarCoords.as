@@ -36,7 +36,7 @@ package com.main
 		}
 		
 		public function getTheta() : Number {
-			return theta;
+			return this.theta;
 		}
 	}
 }

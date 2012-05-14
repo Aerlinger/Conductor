@@ -14,7 +14,7 @@
 	
 	
 	
-	/**
+	/** Ring-like element
 	 * 
 	 * @author Anthony Erlinger
 	 */
@@ -26,7 +26,9 @@
 		
 		
 		
-		/** Creates a new AnnulusElement with a given xPos, yPos, radius, thickness, and color
+		/**  Creates a new AnnulusElement with a given xPos, yPos, radius, thickness, and color
+		 * 
+		 * @author Anthony Erlinger
 		 */
 		public function AnnulusElement( xPos:Number=200, yPos:Number=200, radius:Number=50, thickness:Number=3, color:uint=0xFFFFFF ) {
 			
@@ -159,38 +161,6 @@
 			return PulseAction;
 			
 		}
-		
-		/*
-		public function simpleMotionTween( xDestination:Number, yDestination:Number, EaseFunction:Function, duration:Number ) : Action {
-			
-			var SimpleMotionAction:Action = new Action( this, duration );
-			
-			SimpleMotionAction.setEasingFunction(EaseFunction);
-			SimpleMotionAction.setDestinationPosition(xDestination, yDestination);
-			
-			return SimpleMotionAction;
-		}
-		
-		public function simpleScaleTween( xScaleDestination:Number, yScaleDestination:Number, EaseFunction:Function, duration:Number ) : Action {
-			var SimpleScaleAction:Action = new Action( this, duration );
-			
-			SimpleScaleAction.setEasingFunction(EaseFunction);
-			SimpleScaleAction.setDestinationScale(xScaleDestination, yScaleDestination);
-			
-			return SimpleScaleAction;
-		}
-		
-		public function simpleAlphaTween( alphaFinal:Number, EaseFunction:Function, duration:Number ) : Action {
-			
-			var SimpleAlphaAction:Action = new Action( this, duration );
-			
-			SimpleAlphaAction.setEasingFunction(EaseFunction);
-			SimpleAlphaAction.setDestinationAlpha( alphaFinal );
-			
-			return SimpleAlphaAction;
-			
-		}*/
-		
 		
 	}
 	

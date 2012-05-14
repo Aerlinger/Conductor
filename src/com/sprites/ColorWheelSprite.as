@@ -13,12 +13,11 @@ package com.sprites
 	
 	
 	
-	/** Creates visual elements for ColorWheelMain.
+	/** Creates visual elements for the main splash page.
 	 * 
 	 * @author Anthony Erlinger 
 	 * */
-	public class ColorWheelSprite extends Sprite
-	{
+	public class ColorWheelSprite extends Sprite {
 		
 		public static const RADIUS:Number = 390;	// Radius of the clock circle
 		

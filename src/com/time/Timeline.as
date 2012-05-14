@@ -5,6 +5,8 @@ package com.time
 	import com.element.*;
 	import com.event.*;
 	import com.sprites.*;
+	import com.ui.Metronome;
+	import com.ui.TimelineSprite;
 	
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
@@ -18,8 +20,7 @@ package com.time
 	 * 
 	 * @author Anthony Erlinger
 	 */
-	public class Timeline implements IEventDispatcher
-	{
+	public class Timeline implements IEventDispatcher {
 		
 		// Member objects
 		private var mParent:MovieClip;

@@ -19,10 +19,7 @@ package com.ui
 	 * 
 	 * @author Anthony Erlinger
 	 * */
-	public class TimelineSprite extends Sprite
-	{
-		// Reference to the parent display object (ColorWheelMain in most cases).
-		private var mParent:MovieClip;
+	public class TimelineSprite extends Sprite {
 		
 		// constant dimensions for the timeline:
 		private var TIMELINE_WIDTH:Number = (.8 * Conductor.getWidth());
@@ -55,9 +52,8 @@ package com.ui
 		
 		
 		/** Renders a new TimelineSprite */
-		public function TimelineSprite( pParent:MovieClip, pTimeData:TimeSignatureData ) { 
+		public function TimelineSprite( pTimeData:TimeSignatureData ) { 
 			this.mTimeData 	= pTimeData;
-			this.mParent 	= pParent;
 			
 			TIMELINE_WIDTH = (.8*Conductor.getWidth());
 			
@@ -204,7 +200,7 @@ package com.ui
 				newMeasureStartLine.graphics.lineStyle(2, 0xFF9944, 0.5);
 				newMeasureStartLine.graphics.lineTo( 0, TIMELINE_HEIGHT );
 				
-				//addChild(newMeasureStartLine);
+				addChild(newMeasureStartLine);
 				
 				// For each beat within the measure draw the beat line
 				for( var j:uint=1; j<numBeatsPerMeasure; ++j ) {
@@ -218,7 +214,7 @@ package com.ui
 					newSubLine.graphics.lineStyle(1, 0xCCCCFF, .3);
 					newSubLine.graphics.lineTo(0, TIMELINE_HEIGHT);
 					
-					//addChild(newSubLine);
+					addChild(newSubLine);
 				}
 				
 			}

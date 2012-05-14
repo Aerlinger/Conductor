@@ -2,7 +2,10 @@ package com.util
 {
 	import flash.utils.ByteArray;
 	
-	// ActionScript file
+	/** Static utility functions for common operations
+	 * 
+	 * @author Anthony Erlinger
+	 */ 
 	public final class Utils {
 		
 		public static function copyArray(source:Array) : Array {

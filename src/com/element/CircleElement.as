@@ -28,8 +28,7 @@ package com.element
 		/** Creates a new circle element with the specified position, radius, outline thickness, fill color/alpha, and outline color/alpha */
 		public function CircleElement( pOriginal:CircleElement=null, xPos:Number=0, yPos:Number=0, radius:Number=25, thickness:Number=3, 
 									   	fillColor:uint=0xFFFFFF, fillAlpha:Number=1, 
-										borderColor:uint=0xFF0000, borderAlpha:Number=1) 
-		{
+										borderColor:uint=0xFF0000, borderAlpha:Number=1)  {
 			
 			super(pOriginal, fillColor, fillAlpha, thickness, borderColor, borderAlpha );
 			

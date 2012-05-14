@@ -28,7 +28,7 @@ package com.element
 		/** Creates a new copy of a rectangle element at the given x,y position with the specified width, height and shape data */
 		public function RectangleElement(pOriginal:RectangleElement=null, xPos:Number=0, yPos:Number=0, width:Number=50, height:Number=50, thickness:Number=3, 
 					fillColor:uint=0xFFFFFF, fillAlpha:Number=1, 
-					borderColor:uint=0xFF0000, borderAlpha:Number=1) 
+					borderColor:uint=0xFF0000, borderAlpha:Number=1)  
 		{
 			super(pOriginal, fillColor, fillAlpha, thickness, borderColor, borderAlpha );
 			

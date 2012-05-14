@@ -5,8 +5,10 @@ package com.xml
 	import flash.xml.XMLNodeType;
 	
 	
-	
-	public class XMLReader
-	{
+	/** XML Reads timepoints from XML file 
+	 * Work in progress
+	 * 
+	 */  
+	public class XMLReader {
 	}
 }

@@ -6,7 +6,6 @@ package com.time
 	import com.greensock.*;
 	import com.greensock.core.*;
 	import com.greensock.events.TweenEvent;
-	import com.sound.MusicPlayer;
 	import com.ui.*;
 	
 	import fl.transitions.Tween;
@@ -30,14 +29,10 @@ package com.time
 	 * 
 	 * @author Anthony Erlinger
 	 */
-	public class ConductorTimeline extends TimelineMax
-	{
+	public class ConductorTimeline extends TimelineMax {
 		
+		// Stores the time signature information for this timeline.
 		private var mTimeSignatureData:TimeSignatureData;
-		
-		private var mTimelineSprite:TimelineSprite;	// Visual object for the Timeline
-		private var mMetronome:Metronome;			// Metronome object, pulses each beat and measure.
-		private var mMusicPlayer:MusicPlayer; 
 		
 		
 		// Member Variables
@@ -50,8 +45,8 @@ package com.time
 		private var mSecondsElapsedThisBeat:Number;		// Number of milliseconds elapsed since the onset of this beat.
 		
 		// time tracking variables for beat and measure
-		private var lastStartBeatTime:Number;
-		private var lastMeasureStartTime:Number;
+		private var lastStartBeatTime:Number = 0;
+		private var lastMeasureStartTime:Number = 0;
 		
 		private static var mHasBeenInstantiated:Boolean = false;
 		
@@ -67,7 +62,7 @@ package com.time
 		 * @param pNumMeasures The number of measures in this track
 		 * @param pFrameDurationMillis The internal timer of the Timeline dispatches an event every pFrameDurationMillis
 		 */
-		function ConductorTimeline( pParent:MovieClip, pBpm:Number, pBeatsPerMeasure:Number, pNumMeasures:Number ) {
+		function ConductorTimeline( pBpm:Number, pBeatsPerMeasure:Number, pNumMeasures:Number ) {
 			
 			super({paused:true, onStart:this.onTimelineStart(), onComplete:this.onTimelineEnd()});
 			
@@ -77,36 +72,15 @@ package com.time
 			mHasBeenInstantiated = true;
 			
 			mTimeSignatureData 	= new TimeSignatureData( pBpm, pBeatsPerMeasure, pNumMeasures );
-			mTimelineSprite 	= new TimelineSprite(pParent, mTimeSignatureData);
-			mMetronome 			= new Metronome(Conductor.getCenterX(), Conductor.getCenterY()-25, pBeatsPerMeasure);
-			setMusic("What_is_love.mp3");
-			
-			pParent.addChild(mMetronome);
 			
 			// Used to stretch the timeline 
 			super.insert( new TweenLite({}, 0, {}), mTimeSignatureData.getTrackDurationSeconds() );
-			
-			lastStartBeatTime	 = 0;
-			lastMeasureStartTime = 0;
 			
 			mTimeSignatureData.getMeasureDurationSeconds();
 			
 			mSecondsElapsedThisMeasure	= 2*mTimeSignatureData.getMeasureDurationSeconds(); // Number of milliseconds elapsed this measure
 			mSecondsElapsedThisBeat 	= 2*mTimeSignatureData.getBeatDurationSeconds();	// Number of milliseconds elapsed since the onset of this beat.
-			
-			pParent.addChild(mTimelineSprite);
 		}
-		
-		public function setMusic(name:String) {
-			mMusicPlayer = new MusicPlayer(name);
-		}
-		
-		override public function resume() : void
-		{
-			super.resume();
-			mMusicPlayer.resume();
-		}
-		
 		
 		/** 
 		 * TODO: Not yet implemented
@@ -146,13 +120,12 @@ package com.time
 		
 		/** Inserts a tween at the specified time
 		 */
-		override public function insert(pTween:TweenCore, startTimeInBeats:*=0):TweenCore
-		{	
+		override public function insert(pTween:TweenCore, startTimeInBeats:*=0) : TweenCore {	
 			var startTimeInSeconds:Number = Conductor.getTimeline().beatsToSeconds(startTimeInBeats);
 			
 			var ReturnCore:TweenCore = super.insert(pTween, startTimeInSeconds);
 			
-			mTimelineSprite.addKeypointShape(this, pTween);
+			//mTimelineSprite.addKeypointShape(this, pTween);
 			trace( "Tween (" + name + ") added to timeline: " + pTween.startTime + " / " + pTween.totalDuration);
 			
 			return ReturnCore;
@@ -166,8 +139,7 @@ package com.time
 		
 		/** Overrides the TimelineMax class to render each Tween in the timeline.
 		 * @see TimelineMax */
-		override public function insertMultiple(tweens:Array, timeOrLabel:*=0, align:String="normal", stagger:Number=0):Array
-		{
+		override public function insertMultiple(tweens:Array, timeOrLabel:*=0, align:String="normal", stagger:Number=0):Array {
 			var ReturnValues:Array = super.insertMultiple(tweens, timeOrLabel, align, stagger);
 			
 			for ( var i:uint=0; i<tweens.length; ++i ) {
@@ -183,7 +155,7 @@ package com.time
 				trace( "Tween (" + name + ") added to timeline: " + ThisTween.startTime + " / " + ThisTween.totalDuration);
 				
 				// Add the tween to the main timeline
-				mTimelineSprite.addKeypointShape(this, ThisTween);
+				//mTimelineSprite.addKeypointShape(this, ThisTween);
 			}
 			
 			return ReturnValues;
@@ -200,27 +172,13 @@ package com.time
 		}
 		
 		/** Called at the start of every beat. */
-		private function onBeatStart(beatNumber:Number) : void {
-			this.dispatchEvent( new BeatEvent(BeatEvent.BEAT_START) );
-			
-			mMetronome.subBeat(beatNumber);
+		private function onBeatStart() : void {
+			this.dispatchEvent( new BeatEvent(BeatEvent.BEAT_START, this.mBeatNumForThisMeasure) );
 		}
 		
 		/** Called at the start of every measure. */
 		private function onMeasureStart() : void {
 			this.dispatchEvent( new MeasureEvent(mCurrentMeasureNum, MeasureEvent.MEASURE_START) );
-			
-			mMetronome.downBeat();
-		}
-		
-		
-		///////////////////////////////////////////////////////
-		// Accessor functions for objects
-		///////////////////////////////////////////////////////
-
-		/** Gets the graphical sprite associated with this timeline */
-		public function getTimelineSprite() : TimelineSprite {
-			return mTimelineSprite;
 		}
 		
 		/////////////////////////////////////////////////
@@ -259,6 +217,10 @@ package com.time
 		///////////////////////////////////////////////////////
 		// Accessor methods for variables
 		///////////////////////////////////////////////////////
+		public function getTimeSignatureData() : TimeSignatureData {
+			return this.mTimeSignatureData
+		}
+		
 		/**
 		 * The current beat number for this track 
 		 */
@@ -297,8 +259,7 @@ package com.time
 		/**
 		 * Called every time that the internal timer updates this timeline.
 		 */ 
-		override public function renderTime(time:Number, suppressEvents:Boolean=false, force:Boolean=false):void
-		{
+		override public function renderTime(time:Number, suppressEvents:Boolean=false, force:Boolean=false):void {
 			super.renderTime(time, suppressEvents, force);
 			
 			mSecondsElapsedThisMeasure += (time-lastMeasureStartTime);
@@ -332,14 +293,14 @@ package com.time
 				
 				trace("\t\tBEAT: " + this.currentTime.toFixed(3) + " # " + mBeatNumForThisMeasure + "/" + mTimeSignatureData.getNumBeatsPerMeasure() + "  (#"+this.mCurrentBeatNum + ") in measure " + mCurrentMeasureNum + " started: r="+remainder + " ms.");
 				
-				onBeatStart(mBeatNumForThisMeasure);
+				onBeatStart();
 				
 			}
 			
 			var rotationAngle:Number = this.currentTime/this.totalDuration * 360;
 			
 			this.dispatchEvent( new Event( TweenEvent.UPDATE ) );
-			mTimelineSprite.redrawTimelineCursor( this.currentTime );
+			//mTimelineSprite.redrawTimelineCursor( this.currentTime );
 			
 		}
 		
@@ -367,19 +328,6 @@ package com.time
 		public function secondsToBeats(pDurationInSeconds:Number) : Number {
 			return (pDurationInSeconds/mTimeSignatureData.getBeatDurationSeconds());
 		}
-		
-		
-		override public function set paused(isPause:Boolean):void
-		{
-			super.paused = isPause;
-			if(mMusicPlayer != null) {
-				if(isPause)
-					mMusicPlayer.pause();
-				else
-					mMusicPlayer.resume();
-			}
-		}
-		
 		
 	}
 }

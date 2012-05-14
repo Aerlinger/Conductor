@@ -6,12 +6,11 @@ package com.element
 	
 	
 	
-	public class CollisionManager
-	{
+	public class CollisionManager {
 		
 		
-		private var mCollideableElements:Array = new Array();
-		private var mEvtDispatcher:EventDispatcher = new EventDispatcher();
+		private var mCollideableElements:Array 		= new Array();
+		private var mEvtDispatcher:EventDispatcher 	= new EventDispatcher();
 	
 		private static var INSTANCE:CollisionManager;
 		

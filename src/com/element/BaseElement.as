@@ -36,8 +36,9 @@
 	
 	
 	
-	/** Abstract base class for all Elements. Actions can only be performed
-	 *    on Objects that are of this type. 
+	/** Base class for all Elements. Conductor-specific Actions can only be performed
+	 *  on Objects that extend from this type. By default, an instance of BaseElement
+	 *  does not have shape information. 
 	 * 
 	 * For the sake of efficiency, elements are cached as bitmaps by default.
 	 * 
@@ -45,30 +46,28 @@
 	 * */
 	public class BaseElement extends Sprite implements IEventDispatcher {
 
-		// true when this object is being animated.
-		protected var isCurrentlyTweening:Boolean = false;
 		protected static const DRAW_TWEEN_TRAIL:Boolean = true;
 		
-		//protected var mTweens:TweenCore = null;
-		
+		// Keeps track of how many instances of type BaseElement Exist
 		protected static var mInstanceNumber:uint = 0;
 		
-		private var mCurrentActionNumber:uint = 0;
-		private var mTotalActionNumber:uint = 0;
+		private var mCurrentActionNumber:uint 	= 0;
+		private var mTotalActionNumber:uint 	= 0;
 		
-		// Label variables:
+		//=========================================
+		// Label variables (for debugging)
+		//=========================================
 		protected var mInfoSprite:Sprite;
 		protected var mTextName:TextField;
 		
 		protected var mIsTweening:Boolean = false;
 		
 		protected var mLabelColor:uint;
-		
 		protected var mNumClonesOfThisElement:uint = 0;
 		
-		///////////////////////////////////////////
+		//=========================================
 		// Shape display data for this Element
-		///////////////////////////////////////////
+		//=========================================
 		// Fill data
 		protected var mShapeFill:Shape = new Shape();
 		protected var mFillColor:uint;
@@ -79,48 +78,68 @@
 		protected var mBorderThickness:Number;
 		protected var mBorderColor:uint;
 		protected var mBorderAlpha:Number;
+		
+		//=========================================
 	
+		//List of filter transforms to eb applied to this element
 		protected var mFilterArray:Array = new Array();
 		
 		// Pivot point for rotation
-		protected var mPivot:Point = new Point();
-		protected var mRotation:Number = 0;		// Rotation angle
+		protected var mPivot:Point 		= new Point();
+		protected var mRotation:Number 	= 0;	// Rotation angle
 		
 		protected var mHitRadius:Number = 3;	// Object is not collideable if this number is less than 0.
 		
 		
+		//=========================================
+		// Element-specific timeline
+		//=========================================
 		
-		/** Creates a new instance of BaseElement
+		protected var mElementTimeline:TimelineMax;
+		
+		
+		/** Creates a new instance of BaseElement. Note that the first argument of the constructor is to apply a deep-copy of an existing Element.
+		 * The first parameter should be null unless you wish to create a copy of an existing element
+		 * 
+		 * As a copy-constructor:
+		 * 	var BaseElementCopy = new BaseElement( Original );
+		 * 
+		 * As a new instance of BaseElement:
+		 * 	var BaseElement = new BaseElement(null, 
+		 * 
 		 * @param pOriginalElement Original element to copy from if applicable
+		 * 
 		 * @param pFillColor The Fill color of this element.
 		 * @param pFillAlpha The transparency (0-1) of this element.
+		 * @param pBorderThickness Thickness in pixels of our object's border
+		 * @param pBorderThickness Thickness in pixels of our object's border
 		 */
 		public function BaseElement( pOriginalElement:BaseElement = null, pFillColor:uint=0xFFFFFF, pFillAlpha:Number=1, 
 									 pBorderThickness:Number=2, pBorderColor:Number=0xFF0000, pBorderAlpha:Number=1 ) {
 			
-			this.addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
-			this.addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
-			this.addEventListener(ElementEvent.MOVE, onMove);
-			this.addEventListener(ElementEvent.START, onStartedTween);
-			this.addEventListener(ElementEvent.COMPLETE, onFinishedTween);
-			this.addEventListener(CollisionEvent.COLLIDE, onCollide);
+			
+			// Add event listeners for this object on creation
+			this.addEventListener( Event.ADDED_TO_STAGE, 	onAddedToStage );
+			this.addEventListener( Event.REMOVED_FROM_STAGE, onRemovedFromStage );
+			this.addEventListener( ElementEvent.MOVE, 		onMove );
+			this.addEventListener( ElementEvent.START, 		onStartedTween );
+			this.addEventListener( ElementEvent.COMPLETE, 	onFinishedTween );
+			this.addEventListener( CollisionEvent.COLLIDE, 	onCollide );
 			
 			// Label color is currently a random value (it is ORed with 0x303030 to give it a minimum brightness for visibility)
 			mLabelColor = (Math.random() * Math.pow(2, 24)) | 0x303030;
-			
 			
 			// If this is a copy constructor
 			if( pOriginalElement != null ) {
 				
 				this.mLabelColor = pOriginalElement.mLabelColor;
-				
 				pOriginalElement.mNumClonesOfThisElement++;
 				
-				// duplicate properties of this object
-				this.transform.matrix = pOriginalElement.transform.matrix.clone();
-				this.filters 		= pOriginalElement.filters;
-				this.cacheAsBitmap 	= pOriginalElement.cacheAsBitmap;
-				this.opaqueBackground = pOriginalElement.opaqueBackground;
+				// duplicate properties of original object
+				this.transform.matrix 	= pOriginalElement.transform.matrix.clone();
+				this.filters 			= pOriginalElement.filters;
+				this.cacheAsBitmap 		= pOriginalElement.cacheAsBitmap;
+				this.opaqueBackground 	= pOriginalElement.opaqueBackground;
 				
 				//this.filters = Utils.copyArray( pOriginalElement.filters );
 				this.filters = pOriginalElement.cloneFilters();
@@ -170,8 +189,6 @@
 				
 				this.rotation = 0;
 				
-				addBlur(2, 2);
-				
 				this.filters = new Array();
 				
 				setEnableCollisions(false);		
@@ -184,7 +201,7 @@
 			throw Error("Attempted to clone from abstract class BaseElement");
 		}
 		
-		/** draws bounding box and text labels for this device */
+		/** draws bounding box and text labels for this device. This method is used for active debugging. */
 		protected function redrawInfo() : Sprite {
 			
 			if(this is LineElement)
@@ -378,30 +395,29 @@
 		}
 		
 		/** Sets the pivot point relative to the stage */
-		public function setPivotPoint(globalX:Number, globalY:Number, showRegistration:Boolean=true) : void {
+		public function setPivotPointGlobal(globalX:Number, globalY:Number, showRegistration:Boolean=true) : void {
 			var LocalPivot:Point = this.globalToLocal( new Point(globalX, globalY) );
 			
 			setPivotPointLocal(LocalPivot.x, LocalPivot.y, showRegistration);
 		}
 		
 		/** Sets the rotation of this object relative to its pivot point. */
-		override public function set rotation(angleInDegrees:Number):void
-		{
-			var mat:Matrix= this.transform.matrix.clone();
+		override public function set rotation(angleInDegrees:Number) : void {
+			var RotMatrix:Matrix = this.transform.matrix.clone();
 			var deltaRotation:Number = (angleInDegrees - mRotation);
 			
-			MatrixTransformer.rotateAroundInternalPoint(mat, mPivot.x, mPivot.y, deltaRotation);
-			this.transform.matrix = mat;
+			MatrixTransformer.rotateAroundInternalPoint(RotMatrix, mPivot.x, mPivot.y, deltaRotation);
+			this.transform.matrix = RotMatrix;
 			this.mRotation = angleInDegrees;
 		}
 		
-		/** Gets the rotation of this object. */
+		/** Gets the rotation (in degrees) of this object. */
 		override public function get rotation() : Number {
 			return this.mRotation;
 		}
 		
-		/** Remove this Element by destroying all references to this Element and 
-		 *   setting it to null */
+		/** Remove this Element by destroying all references to this Element, removing it from the stage,
+		 *  and setting it to null */
 		public function destroy() : void {
 			parent.removeChild(this);
 			delete this;
@@ -429,17 +445,12 @@
 			Message += "parent (x,y):  [" + this.x + ", " +this.y + "]" + "\n";
 			Message += "global (x,y):  [" + Global.x + ", " +Global.y + "]" + "\n";
 			
-			
 			Message += "Children:  " + "\n";
 			for( var i:uint=0; i<this.numChildren; ++i) {
 				Message += " " + this.getChildAt(i).name;
 			}
 			
 			return Message;
-		}
-		
-		public function isActive() : Boolean {
-			return (mCurrentActionNumber > -1)
 		}
 		
 		/** TODO: Does the performance improve when alpha = 0? */
