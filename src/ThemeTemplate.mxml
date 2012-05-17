@@ -117,6 +117,7 @@
 		global
 		{
 			font-size: 10px;
+			color: #DEDEDE;
 		}
 		
 	</fx:Style>

@@ -28,7 +28,7 @@ package com.sprites
 				this.y = P.y;
 				
 				// Add the object to the parent
-				Conductor.getInstance().addChild(this);
+				pParent.addChild(this);
 				
 				// The point fades out over the lifetime in seconds
 				var FadeOut:TweenLite = new TweenLite(this, lifetime, {alpha:0});

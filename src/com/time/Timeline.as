@@ -176,9 +176,9 @@ package com.time
 		/** Called at the start of every beat. */
 		private function onBeatStart(beatNumber:Number) : void {
 			
-			this.dispatchEvent( new BeatEvent(BeatEvent.BEAT_START) );
+			this.dispatchEvent( new BeatEvent(BeatEvent.BEAT_START, beatNumber) );
 			
-			mMetronome.subBeat(beatNumber);
+			//mMetronome.startBeat(beatNumber);
 			//mPulseAction.start();
 			
 			//mBeatAnnulus.flower(6, 50);
@@ -193,9 +193,9 @@ package com.time
 		/** Called at the start of every measure. */
 		private function onMeasureStart() : void {
 			
-			this.dispatchEvent( new MeasureEvent(MeasureEvent.MEASURE_START) );
+			this.dispatchEvent( new MeasureEvent(MeasureEvent.MEASURE_START, mCurrentMeasureNum) );
 			
-			mMetronome.downBeat();
+			//mMetronome.startMeasure();
 			
 			//for( var i=0; i<mNumMeasuresElapsed; ++i ) {
 			//	mBeatAnnulus.flower(2^i, (50*i)%(50*mNumMeasures), i/2  );

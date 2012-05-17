@@ -1,23 +1,17 @@
 ﻿package com.element {
 	
+	import com.*;
 	import com.anim.TweenConductor;
 	import com.element.*;
 	import com.event.CollisionEvent;
 	import com.event.ElementEvent;
 	import com.greensock.*;
 	import com.greensock.core.*;
-	import com.greensock.layout.AlignMode;
 	import com.sprites.TrailPoint;
-	import com.time.ConductorTimeline;
-	import com.util.Utils;
 	
-	import fl.motion.Color;
 	import fl.motion.MatrixTransformer;
 	
 	import flash.display.DisplayObject;
-	import flash.display.InteractiveObject;
-	import flash.display.LineScaleMode;
-	import flash.display.MovieClip;
 	import flash.display.Shape;
 	import flash.display.Sprite;
 	import flash.events.Event;
@@ -30,9 +24,6 @@
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
-	import flash.geom.Utils3D;
-	import flash.text.TextField;
-	import flash.utils.getQualifiedClassName;
 	
 	
 	
@@ -44,23 +35,15 @@
 	 * 
 	 * @author Anthony Erlinger
 	 * */
-	public class BaseElement extends Sprite implements IEventDispatcher {
+	public class BaseElement extends SynchronizedSprite implements IEventDispatcher {
 
-		protected static const DRAW_TWEEN_TRAIL:Boolean = true;
+		protected static const DRAW_TWEEN_TRAIL:Boolean = false;
 		
 		// Keeps track of how many instances of type BaseElement Exist
 		protected static var mInstanceNumber:uint = 0;
 		
 		private var mCurrentActionNumber:uint 	= 0;
 		private var mTotalActionNumber:uint 	= 0;
-		
-		//=========================================
-		// Label variables (for debugging)
-		//=========================================
-		protected var mInfoSprite:Sprite;
-		protected var mTextName:TextField;
-		
-		protected var mIsTweening:Boolean = false;
 		
 		protected var mLabelColor:uint;
 		protected var mNumClonesOfThisElement:uint = 0;
@@ -70,16 +53,17 @@
 		//=========================================
 		// Fill data
 		protected var mShapeFill:Shape = new Shape();
-		protected var mFillColor:uint;
-		protected var mFillAlpha:Number;
+		protected var mFillColor:uint = 0xFF0000;
+		protected var mFillAlpha:Number = 1;
 		
 		// Outline data
 		protected var mShapeOutline:Shape = new Shape();
-		protected var mBorderThickness:Number;
-		protected var mBorderColor:uint;
-		protected var mBorderAlpha:Number;
+		protected var mBorderThickness:Number = 1;
+		protected var mBorderColor:uint = 0x000000;
+		protected var mBorderAlpha:Number = 1;
 		
 		//=========================================
+		protected var mIsTweening:Boolean;
 	
 		//List of filter transforms to eb applied to this element
 		protected var mFilterArray:Array = new Array();
@@ -87,7 +71,6 @@
 		// Pivot point for rotation
 		protected var mPivot:Point 		= new Point();
 		protected var mRotation:Number 	= 0;	// Rotation angle
-		
 		protected var mHitRadius:Number = 3;	// Object is not collideable if this number is less than 0.
 		
 		
@@ -115,12 +98,13 @@
 		 * @param pBorderThickness Thickness in pixels of our object's border
 		 */
 		public function BaseElement( pOriginalElement:BaseElement = null, pFillColor:uint=0xFFFFFF, pFillAlpha:Number=1, 
-									 pBorderThickness:Number=2, pBorderColor:Number=0xFF0000, pBorderAlpha:Number=1 ) {
+									 pBorderThickness:Number=1, pBorderColor:Number=0xFF0000, pBorderAlpha:Number=1 ) {
 			
 			
 			// Add event listeners for this object on creation
 			this.addEventListener( Event.ADDED_TO_STAGE, 	onAddedToStage );
 			this.addEventListener( Event.REMOVED_FROM_STAGE, onRemovedFromStage );
+			this.addEventListener( Event.SELECT, onRemovedFromStage );
 			this.addEventListener( ElementEvent.MOVE, 		onMove );
 			this.addEventListener( ElementEvent.START, 		onStartedTween );
 			this.addEventListener( ElementEvent.COMPLETE, 	onFinishedTween );
@@ -129,162 +113,66 @@
 			// Label color is currently a random value (it is ORed with 0x303030 to give it a minimum brightness for visibility)
 			mLabelColor = (Math.random() * Math.pow(2, 24)) | 0x303030;
 			
-			// If this is a copy constructor
-			if( pOriginalElement != null ) {
-				
-				this.mLabelColor = pOriginalElement.mLabelColor;
-				pOriginalElement.mNumClonesOfThisElement++;
-				
-				// duplicate properties of original object
-				this.transform.matrix 	= pOriginalElement.transform.matrix.clone();
-				this.filters 			= pOriginalElement.filters;
-				this.cacheAsBitmap 		= pOriginalElement.cacheAsBitmap;
-				this.opaqueBackground 	= pOriginalElement.opaqueBackground;
-				
-				//this.filters = Utils.copyArray( pOriginalElement.filters );
-				this.filters = pOriginalElement.cloneFilters();
-				
-				if( pOriginalElement.isCollisionEnabled() ) {
-					setEnableCollisions(true);
-					this.hitArea.graphics.copyFrom(pOriginalElement.hitArea.graphics);
-				} else {
-					setEnableCollisions(false);
-				}
-				
-				if (pOriginalElement.scale9Grid) {
-					var rect:Rectangle = pOriginalElement.scale9Grid;
-					// A bug existed in Flash 9 where the scale9Grid was 20x larger than assigned
-					// rect.x /= 20, rect.y /= 20, rect.width /= 20, rect.height /= 20;
-					this.scale9Grid = rect;
-				}
-				
-				mNumClonesOfThisElement++;
-				
-				this.name = pOriginalElement.name + "-" + pOriginalElement.mNumClonesOfThisElement;
-				
-				this.x = pOriginalElement.x;
-				this.y = pOriginalElement.y;
-				
-				this.mPivot = pOriginalElement.mPivot;
+			this.name = "BaseElement" + (++mInstanceNumber);
 			
-			// Not a copy constructor
-			} else {
-				
-				this.name = "BaseElement" + (++mInstanceNumber);
-				
-				// Cache as bitmap by default for efficiency
-				this.cacheAsBitmap = true;
-				
-				this.mFillColor = pFillColor;
-				this.mFillAlpha = pFillAlpha;
-				
-				this.mBorderThickness = pBorderThickness;
-				this.mBorderColor = pBorderColor;
-				this.mBorderAlpha = pBorderAlpha;
-				
-				this.removeFill();
-				
-				this.mPivot.x = 0;
-				this.mPivot.y = 0;
-				
-				this.rotation = 0;
-				
-				this.filters = new Array();
-				
-				setEnableCollisions(false);		
-			}
+			// Cache as bitmap by default for efficiency
+			this.cacheAsBitmap = true;
+			
+			this.mFillColor = pFillColor;
+			this.mFillAlpha = pFillAlpha;
+			
+			this.mBorderThickness = pBorderThickness;
+			this.mBorderColor = pBorderColor;
+			this.mBorderAlpha = pBorderAlpha;
+			
+			this.filters = new Array();
+			
+			// Collisions are disabled by default
+			this.setEnableCollisions(false);		
 			
 		}
 		
 		/** Performs a deep copy on this BaseElement and returns the result */
 		public function clone() : * {
-			throw Error("Attempted to clone from abstract class BaseElement");
-		}
-		
-		/** draws bounding box and text labels for this device. This method is used for active debugging. */
-		protected function redrawInfo() : Sprite {
 			
-			if(this is LineElement)
-				return null;
+			var clonedElement:BaseElement = new BaseElement();
 			
-			if(mInfoSprite!=null) {
-				try {
-					this.removeChild(mInfoSprite);
-				} catch( E:ArgumentError ) {
-					throw new Error("Tried to remove ElementInfoSprite from stage when not already present on stage");
-				}
+			clonedElement.mLabelColor = this.mLabelColor;
+			this.mNumClonesOfThisElement++;
+			
+			// duplicate properties of original object
+			clonedElement.transform.matrix 	= this.transform.matrix.clone();
+			clonedElement.filters 			= this.filters;
+			clonedElement.cacheAsBitmap 	= this.cacheAsBitmap;
+			clonedElement.opaqueBackground 	= this.opaqueBackground;
+			
+			//this.filters = Utils.copyArray( pOriginalElement.filters );
+			clonedElement.filters = this.cloneFilters();
+			
+			if( this.isCollisionEnabled() ) {
+				setEnableCollisions(true);
+				clonedElement.hitArea.graphics.copyFrom(this.hitArea.graphics);
+			} else {
+				setEnableCollisions(false);
 			}
 			
-			// Shape with information to be added
-			mInfoSprite = new Sprite();
-			
-			if(this is Group) {
-				mInfoSprite.graphics.lineStyle(1, mLabelColor, .6, false, LineScaleMode.NONE);
-				
-				// Draw the crosshair at the center
-				mInfoSprite.graphics.moveTo(-5, -5);
-				mInfoSprite.graphics.lineTo(5, 5);
-				mInfoSprite.graphics.moveTo(5, -5);
-				mInfoSprite.graphics.lineTo(-5, 5);
-			}
-			else {
-				mInfoSprite.graphics.lineStyle(0, 0xFFFF00, 1, false, LineScaleMode.NONE);
-				
-				// Draw the crosshair at the center
-				mInfoSprite.graphics.moveTo(-5, 0);
-				mInfoSprite.graphics.lineTo(5, 0);
-				mInfoSprite.graphics.moveTo(0, -5);
-				mInfoSprite.graphics.lineTo(0, 5);
+			if (this.scale9Grid) {
+				var rect:Rectangle = this.scale9Grid;
+				// A bug existed in Flash 9 where the scale9Grid was 20x larger than assigned
+				// rect.x /= 20, rect.y /= 20, rect.width /= 20, rect.height /= 20;
+				clonedElement.scale9Grid = rect;
 			}
 			
-			var boundRect:Rectangle = getRect( Conductor.getInstance() );
+			mNumClonesOfThisElement++;
 			
-			var boundWidth:Number 	= boundRect.width;
-			var boundHeight:Number 	= boundRect.height;
+			clonedElement.name = this.name + "-" + this.mNumClonesOfThisElement;
 			
-			var LocalPoint:Point = this.globalToLocal( new Point( boundRect.x, boundRect.y ) );
+			clonedElement.x = this.x;
+			clonedElement.y = this.y;
 			
-			var xMin:Number	= LocalPoint.x;
-			var yMin:Number	= LocalPoint.y;
+			clonedElement.mPivot = this.mPivot;
 			
-			if(this is Group) {
-				xMin -= boundWidth/2;
-				yMin -= boundHeight/2;
-			}
-			
-			mInfoSprite.graphics.beginFill(0x00FF00, 0);
-			mInfoSprite.graphics.drawRect(xMin, yMin, boundWidth, boundHeight);
-			
-			// Name label
-			mTextName = new TextField();
-			mTextName.text = this.name;
-			
-			mTextName.y = yMin-14;
-			mTextName.textColor = mLabelColor;
-			mTextName.selectable = false;
-			mTextName.scaleX = 0.9;
-			mTextName.scaleY = 0.9;
-			mTextName.x = (xMin + boundWidth-2) - mTextName.width/2;
-			
-			if( this is Group ) {
-				mTextName.y = yMin-18;
-				mTextName.scaleX = 1.1;
-				mTextName.scaleY = 1.1;
-			}
-			
-			this.addEventListener( MouseEvent.MOUSE_DOWN, onPressElement );
-			
-			mInfoSprite.addChild(mTextName);
-			
-			mInfoSprite.x = 0;
-			mInfoSprite.y = 0;
-			
-			this.addChild(mInfoSprite);
-			
-			if(this is Group) 
-				mInfoSprite.alpha = 0.5;
-			
-			return mInfoSprite;
+			return clonedElement;
 		}
 		
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -365,10 +253,11 @@
 			CollisionMarker.graphics.beginFill(0xFF0000, 1.0);
 			CollisionMarker.graphics.drawCircle(0, 0, 10);
 			
-			Conductor.getInstance().addChild(CollisionMarker);
+			if(this.parent != null)
+				this.parent.addChild(CollisionMarker);
 			
-			CollisionEvt.getFirstElement().alpha = .5;
-			CollisionEvt.getSecondElement().alpha = .5;
+			CollisionEvt.getFirstElement().alpha 	= .5;
+			CollisionEvt.getSecondElement().alpha 	= .5;
 		}
 		
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -453,13 +342,18 @@
 			return Message;
 		}
 		
-		/** TODO: Does the performance improve when alpha = 0? */
+		/** TODO: Check if the performance improve when alpha = 0 */
 		public function removeFill() : void {
 			mShapeFill.alpha = 0;
 		}
 		
 		public function removeOutline() : void {
 			mShapeOutline.alpha = 0;
+		}
+		
+		public function destroyShapeData() : void {
+			mShapeFill 		= null;
+			mShapeOutline 	= null;
 		}
 		
 		public function setOutlineColor(color:Number) : void {
@@ -488,9 +382,9 @@
 			var MoveTween:TweenConductor = new TweenConductor(this, durationInBeats, {x:destinationX, y:destinationY});
 			
 			if( isNaN(startTimeInBeats) ) // Start immediately
-				Conductor.getTimeline().insertNow( MoveTween );
+				mMainTimeline.insertNow( MoveTween );
 			else 
-				Conductor.getTimeline().insert(MoveTween, startTimeInBeats);
+				mMainTimeline.insert(MoveTween, startTimeInBeats);
 			
 			return MoveTween;
 		}
@@ -504,9 +398,9 @@
 			var ScaleTween:TweenConductor = new TweenConductor(this, durationInBeats, {scaleX:scalX, scaleY:scalY});
 			
 			if( isNaN(startTimeInBeats) ) {	// Start immediately
-				Conductor.getTimeline().insertNow( ScaleTween );
+				mMainTimeline.insertNow( ScaleTween );
 			} else {
-				Conductor.getTimeline().insert(ScaleTween, startTimeInBeats);
+				mMainTimeline.insert(ScaleTween, startTimeInBeats);
 			}
 			
 			return ScaleTween;
@@ -521,9 +415,9 @@
 			var RotateTween:TweenConductor = new TweenConductor(this, durationInBeats, {rotation:thetaInDeg});
 			
 			if( isNaN(startTimeInBeats) ) // Start immediately
-				Conductor.getTimeline().insertNow( RotateTween );
+				mMainTimeline.insertNow( RotateTween );
 			else 
-				Conductor.getTimeline().insert(RotateTween, startTimeInBeats);
+				mMainTimeline.insert(RotateTween, startTimeInBeats);
 			
 			return RotateTween;
 		}
@@ -544,7 +438,7 @@
 			
 			if(useSeconds) {
 				// Convert time from beats to seconds so that it can be used by the tween engine.
-				durationInBeats = Conductor.getTimeline().secondsToBeats(durationInBeats);
+				durationInBeats = mMainTimeline.secondsToBeats(durationInBeats);
 			}
 			
 			for(var i:uint=0; i<numPetals; ++i) {
@@ -572,7 +466,7 @@
 			
 			if(useSeconds) {
 				// Convert time from beats to seconds if applicable
-				durationInBeats = Conductor.getTimeline().secondsToBeats(durationInBeats);
+				durationInBeats = mMainTimeline.secondsToBeats(durationInBeats);
 			}
 			
 			var timeStep:Number = 1.0/frequency;
@@ -599,8 +493,7 @@
 		}
 		
 		/** Creates a copy of this object which is scaled outward and simulatenously faded out */
-		public function flare(scale:Number=1.15, durationInBeats:Number=1.0, alpha:Number=0, useSeconds:Boolean=false) : TimelineMax
-		{
+		public function flare(scale:Number=1.15, durationInBeats:Number=1.0, alpha:Number=0, useSeconds:Boolean=false) : TimelineMax {
 			var FlareGroup:Group = Group.createGroupFromElement(this, 2);
 			
 			var FlareOutElement:BaseElement = FlareGroup.getChildElementAt(0);
@@ -611,10 +504,10 @@
 			FlareInElement.x = 0;
 			FlareInElement.y = 0;
 			
-			if(useSeconds) {
-				// Convert time from beats to seconds so that it can be used by the tween engine.
-				durationInBeats = Conductor.getTimeline().secondsToBeats(durationInBeats);
-			}
+			// Convert time from beats to seconds so that it can be used by the tween engine.
+			if(useSeconds)
+				durationInBeats = mMainTimeline.secondsToBeats(durationInBeats);
+			
 			
 			var ScaleTweenOut:TweenConductor = new TweenConductor( FlareOutElement, durationInBeats, {scaleX:scale, scaleY:scale,alpha:alpha} );
 			var ScaleTweenIn:TweenConductor = new TweenConductor( FlareInElement, durationInBeats, {scaleX:(1/scale), scaleY:(1/scale),alpha:alpha} );
@@ -694,8 +587,6 @@
 		/** Called when this Element is pressed */
 		private function onPressElement(Evt:MouseEvent) : void {
 			trace( this.toString() );
-			
-			Conductor.updateElementStatusTextInfo(this);
 		}
 		
 		/** Listener: Called every time this Element is added to the stage 
@@ -709,9 +600,6 @@
 				trace(">>> Element added to stage: " + this.name);
 			else 
 				trace("Warning: " + this.name + " parent object should be either the main stage, another BaseElement, or a Group. Parent is " + this.parent.name);
-			
-			// Render helpful information about this object on the screen.
-			redrawInfo();
 			
 			// When added to the stage register this element with the ElementManager
 			if( this is Group ) 
@@ -728,32 +616,36 @@
 				//Conductor.getTimeline().remove(mTweens);
 		}
 		
+		/** Listener: Called every time this Element is removed from the stage */
+		public function onSelected( ActionEvt:Event ) : void {
+			//if(mTweens != null)
+			//Conductor.getTimeline().remove(mTweens);
+		}
+		
 		public function onStartedTween(ActionEvt:Event) : void {
-			trace("\t> Subaction (" + this.mCurrentActionNumber + "/" + this.mTotalActionNumber + ") started for: " + this.name + " @: " + Conductor.getTimeline().currentTime);
+			//trace("\t> Subaction (" + this.mCurrentActionNumber + "/" + this.mTotalActionNumber + ") started for: " + this.name + " @: " + Conductor.getTimeline().currentTime);
 			mCurrentActionNumber++;
 			this.mIsTweening = true;
 			
 			var TweeningColor:ColorTransform  = new ColorTransform(0, 1, 0);
 			TweeningColor.color = 0x00FF00;
-			mInfoSprite.transform.colorTransform = TweeningColor;
+
 		}
 		
 		public function onFinishedTween(ActionEvt:Event) : void {
-			trace("\t> Subaction (" + this.mCurrentActionNumber + "/" + this.mTotalActionNumber + ") finished for: " + this.name + " @: " + Conductor.getTimeline().currentTime);
+			//trace("\t> Subaction (" + this.mCurrentActionNumber + "/" + this.mTotalActionNumber + ") finished for: " + this.name + " @: " + Conductor.getTimeline().currentTime);
 			this.mIsTweening = false;
 			
 			var TweeningColor:ColorTransform  = new ColorTransform(0, 1, 0);
 			TweeningColor.color = 0xFFFF00;
-			mInfoSprite.transform.colorTransform = TweeningColor;	
+	
 		}
 		
 		public function onAddedNewAction(ActionEvt:Event) : void {
 			mTotalActionNumber++;
-			trace(">> Action: added new action for: " + this.name + " @: " + Conductor.getTimeline().currentTime);
 		}
 		
 		public function onRemovedAction(ActionEvt:Event) : void {
-			trace(">> Action: removed action for: " + this.name + " @: " + Conductor.getTimeline().currentTime);
 		}
 		
 		/** Called every time this element is moved *BY A TWEEN* */

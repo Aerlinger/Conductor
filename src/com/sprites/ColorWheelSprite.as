@@ -22,9 +22,7 @@ package com.sprites
 		public static const RADIUS:Number = 390;	// Radius of the clock circle
 		
 		// Shapes and visual elements:
-		private var mPlayBar:Sprite;			// Line to track proress of track.		
-		
-		
+		private var mPlayBar:Sprite;			// Line to track proress of track.
 		
 		
 		/** Starting point of program */

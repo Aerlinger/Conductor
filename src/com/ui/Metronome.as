@@ -1,15 +1,16 @@
 ﻿package com.ui
 {
 
-	import com.element.BaseElement;
+	import com.element.SynchronizedSprite;
+	import com.event.BeatEvent;
+	import com.event.MeasureEvent;
+	import com.greensock.TweenMax;
 	
-	import fl.transitions.Tween;
 	import fl.transitions.TweenEvent;
 	import fl.transitions.easing.*;
 	
-	import flash.display.MovieClip;
 	import flash.display.Shape;
-	import flash.display.Sprite;
+	import flash.events.Event;
 	import flash.text.TextField;
 
 	
@@ -17,19 +18,10 @@
 	 * 
 	 * @author Anthony Erlinger
 	 * */
-	public class Metronome extends Sprite {
+	public class Metronome extends SynchronizedSprite {
 
 		private var BeatOnsetShape:Shape;
 		private var SubBeatShape:Shape;
-		
-		// Beat onset 
-		private var mouthTween:Tween;
-		
-		private var DownbeatTweenScaleX:Tween;
-		private var DownbeatTweenScaleY:Tween;
-		
-		private var SubBeatTweenScaleX:Tween;
-		private var SubBeatTweenScaleY:Tween;
 
 		private var radius:Number = 30;
 		
@@ -40,27 +32,14 @@
 		private var mTimerTxt:TextField;
 		
 		
-		
-		
 		public function Metronome( xPos:Number, yPos:Number, beatsPerMeasure:Number ) {
 			
 			// Create circles which pulse at the onset of every beat, and measure (downbeat).
 			BeatOnsetShape 	= createDownBeatShape(xPos,yPos);
 			SubBeatShape 	= createSubBeatShape(xPos,yPos);
 			
-			DownbeatTweenScaleX = new Tween(BeatOnsetShape, "scaleX", Strong.easeIn, 1, 1.1, .5, true);
-			DownbeatTweenScaleY = new Tween(BeatOnsetShape, "scaleY", Strong.easeIn, 1, 1.1, .5, true);
-			
-			mouthTween = new Tween(Conductor.getInstance().KittyMouth, "y", Strong.easeInOut, Conductor.getInstance().KittyMouth.y, Conductor.getInstance().KittyMouth.y+7, .5, true);
-			SubBeatTweenScaleX = new Tween(Conductor.getInstance().KittyHead, "rotation", Strong.easeIn, 0, -7, .5, true);
-			//SubBeatTweenScaleX = new Tween(SubBeatShape, "scaleX", Strong.easeOut, 1, 1.1, 2, true);
-			SubBeatTweenScaleY = new Tween(SubBeatShape, "scaleY", Strong.easeOut, 1, 1.1, 2, true);
-			
-			DownbeatTweenScaleY.addEventListener(TweenEvent.MOTION_FINISH, startBeatTweenFinish);
-			SubBeatTweenScaleY.addEventListener(TweenEvent.MOTION_FINISH, subBeatTweenFinish);
-			
-			//this.addChild( BeatOnsetShape );
-			//this.addChild( SubBeatShape );
+			this.addChild( BeatOnsetShape );
+			this.addChild( SubBeatShape );
 			
 			// Create "Metronome" title
 			mTitleTxt = new TextField();
@@ -101,11 +80,6 @@
 			
 			this.name = "MetronomeDefault";
 		}
-
-		public function moveMouth(duration:Number) : void {
-			var MouthMovement:Tween = new Tween(Conductor.getInstance().KittyMouthLoader, "y", Strong.easeInOut, Conductor.getInstance().KittyMouthLoader.y, Conductor.getInstance().KittyMouthLoader.y+20, duration, true);
-			MouthMovement.yoyo();
-		}
 		
 		private function createDownBeatShape(xPos:Number, yPos:Number) : Shape {
 			var BeatOnsetShape:Shape = new Shape();
@@ -136,48 +110,21 @@
 		}
 		
 		/** Called at the start of each measure */
-		public function downBeat() : void {
+		override protected function beatStart(event:BeatEvent) : void {
 			
-			DownbeatTweenScaleX.start();
-			DownbeatTweenScaleY.start();
+			TweenMax.to(SubBeatShape, .1, {yoyo:true, repeat:1, scaleX:.1, scaleY:.1});
+			TweenMax.to(BeatOnsetShape, .1, {yoyo:true, repeat:1, scaleX:1.5, scaleY:1.5});
 			
 			mTimeSignatureTxt.text = "1/"+mNumBeatsPerMeasure;
 		}
-
-		/** Called at the start of each beat */
-		public function subBeat( beatNum:Number ) : void {
-			SubBeatTweenScaleX.start();
-			SubBeatTweenScaleY.start();
-			mouthTween.start();
-			
-			mTimeSignatureTxt.text = "" + beatNum + "/" + mNumBeatsPerMeasure;
+		
+		override protected function measureStart(measureEvent:MeasureEvent):void {
+			//TweenMax.to(SubBeatShape, .5, {yoyo:true, scaleX:1.1, scaleY:1.1, alpha:0});
+			//TweenMax.to(BeatOnsetShape, .5, {yoyo:true, scaleX:1.1, scaleY:1.1, alpha:0});
+			// TODO Auto Generated method stub
+			super.measureStart(measureEvent);
 		}
 		
-		/** remove the tween when it's done so it doesn't repeat */
-		private function startBeatTweenFinish(Evt:TweenEvent) : void {
-			DownbeatTweenScaleX.removeEventListener(TweenEvent.MOTION_FINISH, startBeatTweenFinish );
-			DownbeatTweenScaleY.removeEventListener(TweenEvent.MOTION_FINISH, startBeatTweenFinish );
-			
-			//Conductor.getInstance().rotation;
-			
-			//DownbeatTweenScaleX.yoyo();
-			//DownbeatTweenScaleY.yoyo();
-			
-		}
-		
-		/** remove the tween when it's done so it doesn't repeat */
-		private function subBeatTweenFinish(Evt:TweenEvent) : void {
-			
-			Conductor.getInstance().KittyMouth.y -= 10;
-			SubBeatTweenScaleX.removeEventListener(TweenEvent.MOTION_FINISH, subBeatTweenFinish );
-			SubBeatTweenScaleY.removeEventListener(TweenEvent.MOTION_FINISH, subBeatTweenFinish );
-			mouthTween.removeEventListener(TweenEvent.MOTION_FINISH, subBeatTweenFinish );
-			
-			mouthTween.yoyo();
-			SubBeatTweenScaleX.yoyo();
-			SubBeatTweenScaleY.yoyo();
-			
-		}
 
 	}
 

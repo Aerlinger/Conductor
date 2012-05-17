@@ -1,8 +1,9 @@
-package com.lyrics
+﻿package com.lyrics
 {
 	import flash.geom.Point;
 	
-	import spark.components.Label;
+	//import spark.components.Label;
+	import mx.controls.Label;
 
 	public class SimpleKaraokeDisplay
 	{
@@ -41,10 +42,10 @@ package com.lyrics
 			this._element = new Label();//jQuery(document.createElement('div'));
 			//this._element.attr('class', 'karaoke-line');
 			//this._display.append(this._element);
-			Conductor.getInstance().addChild(this._element);
+			//Conductor.getInstance().addChild(this._element);
 			
 			//container.append(this._display);
-			Conductor.getInstance().addChild(this._display);
+			//Conductor.getInstance().addChild(this._display);
 			
 			// Empty overlay
 			this._overlay = null;
@@ -99,7 +100,7 @@ package com.lyrics
 		public function _removeOverlay() {
 			if (this._overlay != null) {
 				//this._overlay.remove();
-				Conductor.getInstance().removeChild(this._overlay);
+				//Conductor.getInstance().removeChild(this._overlay);
 				this._overlay = null;
 			}
 		};
@@ -237,7 +238,7 @@ package com.lyrics
 			innerElement.text = (content);
 			innerElement.x = 10;
 			innerElement.y = 100;
-			Conductor.getInstance().addChild(innerElement);
+			//Conductor.getInstance().addChild(innerElement);
 			//this._element.append(innerElement);
 			
 			// Need this information to place the inner overlay
@@ -261,7 +262,7 @@ package com.lyrics
 			//overlay.css('visibility', 'hidden');
 			
 			//this._display.append(overlay);
-			Conductor.getInstance().addChild(overlay);
+			//Conductor.getInstance().addChild(overlay);
 			
 			if (this._engine._rightToLeft) {
 				// The overlay width is less than the width of the entire line, 

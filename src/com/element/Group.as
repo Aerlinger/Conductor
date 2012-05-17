@@ -30,10 +30,9 @@ package com.element
 	 * 
 	 * @author Anthony Erlinger
 	 */
-	public class Group extends BaseElement
-	{
+	public class Group extends BaseElement {
 		// Cache to store the members of this group for easy access (these elements will also exist in the Display List).
-		private var mGroupChildren:Vector.<BaseElement>;
+		private var mGroupChildren:Array = new Array();
 
 		// A point to remember the center position of this Group.
 		private var mBoundingBox:Rectangle;
@@ -42,64 +41,30 @@ package com.element
 		
 		
 		/** Creates a new group from a list of elements */
-		public function Group(pOriginal:Group=null, ...Elements) {
-			super( pOriginal );
+		public function Group(...Elements) {
+			super();
 			
 			// Groups do not have shape data by default
-			mShapeFill 		= null;
-			mShapeOutline 	= null;
+			destroyShapeData();
 			
-			mGroupChildren = new Vector.<BaseElement>();
+			mGroupChildren.push(Elements);
 			
-			if(pOriginal == null) {
+			// The center of this group is set to be the center of the bounding box of the children which it contains.
+			mBoundingBox = getBoundingBoxFromList.apply(null, Elements);
 			
-				if(Elements[0] is Array)
-					Elements = Elements[0];
-				
-				// The center of this group is set to be the center of the bounding box of the children which it contains.
-				mBoundingBox = getBoundingBoxFromList.apply(null, Elements);
-				
-				// Default name
-				this.name = "Group" + (++mGroupInstanceNumber);
-				
-				this.x = mBoundingBox.x + mBoundingBox.width/2;
-				this.y = mBoundingBox.y + mBoundingBox.height/2;
-				
-				
-				for( var i:uint = 0; i<Elements.length; ++i ) {
-					if(i==0) {
-						// The parent of the objects in the group becomes the parent of this group.
-						// Add this group to the parent of whatever we are grouping.
-						if(Elements[0].parent != null)
-							Elements[0].parent.addChild(this);
-						// If the object we are grouping is not yet added to the stage then we add the group to Root
-						else
-							Conductor.getInstance().addChild(this);
-					}
-					
-					addElement(Elements[i]);
-				}
+			// Default name
+			this.name = "Group" + (++mGroupInstanceNumber);
 			
-				// For cloning
-			} else {
-				this.x = pOriginal.x;
-				this.y = pOriginal.y;
+			this.x = mBoundingBox.x + mBoundingBox.width/2;
+			this.y = mBoundingBox.y + mBoundingBox.height/2;
+			
+			for( var i:uint = 0; i<Elements.length; ++i ) {
 				
-				this.name = pOriginal.name + "-" + mNumClonesOfThisElement;
+				if( (Elements[i] as BaseElement).parent != null )
+					(Elements[i] as BaseElement).parent.removeChild(Elements[i]);
 				
-				this.mBoundingBox = pOriginal.mBoundingBox.clone();
-				
-				pOriginal.parent.addChild(this);
-				
-				for( var j:uint=0; j<pOriginal.mGroupChildren.length; ++j ) {
-					var ClonedElement:BaseElement = (pOriginal.mGroupChildren[j]).clone();
-					
-					this.addChild(ClonedElement);
-					this.mGroupChildren.push( ClonedElement );
-				}
+				addElement(Elements[i]);
 			}
-			
-			var TestInfo:Sprite = redrawInfo();
 			
 			this.addEventListener(ElementEvent.ADD_TO_GROUP, this.onAddToGroup);
 			this.addEventListener(ElementEvent.REMOVE_FROM_GROUP, this.onRemoveFromGroup);
@@ -107,7 +72,23 @@ package com.element
 		
 		/** Returns an exact copy of this group */
 		override public function clone() : * {
-			return new Group(this);
+			var clonedGroup:Group;
+			
+			clonedGroup.x = this.x;
+			clonedGroup.y = this.y;
+			
+			clonedGroup.name = this.name + "-" + mNumClonesOfThisElement;
+			
+			clonedGroup.mBoundingBox = this.mBoundingBox.clone();
+			
+			this.parent.addChild(this);
+			
+			for( var j:uint=0; j<this.mGroupChildren.length; ++j ) {
+				var ClonedElement:BaseElement = (this.mGroupChildren[j]).clone();
+				
+				clonedGroup.addChild(ClonedElement);
+				clonedGroup.mGroupChildren.push( ClonedElement );
+			}
 		}
 		
 		/** Static initializer method to copy a BaseElement into a group. */
@@ -160,8 +141,8 @@ package com.element
 			}
 		}
 		
-		/** returns a copy of the group's children as an ordered array */
-		private function getChildElements() : Array {
+		/** Returns a copy of the group's children as an ordered array */
+		public function getChildElements() : Array {
 			var Elements:Array = new Array();
 			
 			for( var i:uint=0; i<mGroupChildren.length; ++i ) {
@@ -180,7 +161,7 @@ package com.element
 		 * All other (non-child) fields of the group are destroyed with the group Element. 
 		 * 
 		 * TODO: Test*/
-		public function unGroup() : Vector.<BaseElement> {
+		public function unGroup() : Array {
 			var Parent:Sprite = this.parent as Sprite;
 			
 			for( var i:uint=0; i<mGroupChildren.length; ++i ) {
@@ -278,7 +259,7 @@ package com.element
 			
 			if(useSeconds) {
 				// Convert time from beats to seconds so that it can be used by the tween engine.
-				durationInBeats = Conductor.getTimeline().beatsToSeconds(durationInBeats);
+				durationInBeats = mMainTimeline.beatsToSeconds(durationInBeats);
 			}
 			
 			var FlowerGroupArray:Array = new Array();

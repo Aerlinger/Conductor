@@ -43,7 +43,7 @@ package com.lyrics
 //				throw new Error("Can't find element #" + containerID)
 //			}
 			
-			this._container = Conductor.getInstance();//jQuery(elm);
+			this._container = [];//Conductor.getInstance();//jQuery(elm);
 			this._displays = [];
 			
 			// We create a "display" element for each line of karaoke. In terms of

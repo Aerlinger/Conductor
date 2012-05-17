@@ -121,7 +121,7 @@ package com.time
 		/** Inserts a tween at the specified time
 		 */
 		override public function insert(pTween:TweenCore, startTimeInBeats:*=0) : TweenCore {	
-			var startTimeInSeconds:Number = Conductor.getTimeline().beatsToSeconds(startTimeInBeats);
+			var startTimeInSeconds:Number = beatsToSeconds(startTimeInBeats);
 			
 			var ReturnCore:TweenCore = super.insert(pTween, startTimeInSeconds);
 			
@@ -169,16 +169,6 @@ package com.time
 		/** Called when this timeline begins */
 		private function onTimelineEnd() : void {
 			trace(">>> Timeline Completed <<<");
-		}
-		
-		/** Called at the start of every beat. */
-		private function onBeatStart() : void {
-			this.dispatchEvent( new BeatEvent(BeatEvent.BEAT_START, this.mBeatNumForThisMeasure) );
-		}
-		
-		/** Called at the start of every measure. */
-		private function onMeasureStart() : void {
-			this.dispatchEvent( new MeasureEvent(mCurrentMeasureNum, MeasureEvent.MEASURE_START) );
 		}
 		
 		/////////////////////////////////////////////////
@@ -256,6 +246,22 @@ package com.time
 			return this.mSecondsElapsedThisBeat;
 		}
 		
+		override public function restart(includeDelay:Boolean=false, suppressEvents:Boolean=true):void
+		{
+			// TODO Auto Generated method stub
+			super.restart(includeDelay, suppressEvents);
+			
+			mTotalSecondsElapsed = 0;	// Number of seconds elapsed
+			mSecondsElapsedThisMeasure;	// Number of milliseconds elapsed this measure
+			mSecondsElapsedThisBeat;	// Number of milliseconds elapsed since the onset of this beat.
+			
+			// time tracking variables for beat and measure
+			lastStartBeatTime = 0;
+			lastMeasureStartTime = 0;
+		}
+		
+		
+		
 		/**
 		 * Called every time that the internal timer updates this timeline.
 		 */ 
@@ -273,8 +279,8 @@ package com.time
 				mSecondsElapsedThisMeasure = remainder;
 				this.mCurrentMeasureNum++;
 				
-				onMeasureStart();
 				trace("\tMEAS " + this.currentTime.toFixed(3) + " # "+ mCurrentMeasureNum + " started:   t= " + mTotalSecondsElapsed/1000 +  "  (r="+remainder+")");
+				this.dispatchEvent( new MeasureEvent(MeasureEvent.MEASURE_START, mCurrentMeasureNum) );
 			}
 			
 			mSecondsElapsedThisBeat += (time-lastStartBeatTime);
@@ -286,21 +292,18 @@ package com.time
 				// Reset the number of milliseconds elapsed this beat to whatever the remainder is.
 				mSecondsElapsedThisBeat = remainder;
 				
-				// mCurrentBeatNum Repeats cyclically 1, 2, 3, 4, 5, 6, 1, 2...
+				// mCurrentBeatNum Repeats cyclically 1, 2, 3, 4... 1, 2, 3, 4...
 				this.mBeatNumForThisMeasure = (mCurrentBeatNum % (mTimeSignatureData.getNumBeatsPerMeasure())) + 1;
 				
 				this.mCurrentBeatNum++;
 				
 				trace("\t\tBEAT: " + this.currentTime.toFixed(3) + " # " + mBeatNumForThisMeasure + "/" + mTimeSignatureData.getNumBeatsPerMeasure() + "  (#"+this.mCurrentBeatNum + ") in measure " + mCurrentMeasureNum + " started: r="+remainder + " ms.");
-				
-				onBeatStart();
+				this.dispatchEvent( new BeatEvent(BeatEvent.BEAT_START, this.mBeatNumForThisMeasure) );
 				
 			}
 			
-			var rotationAngle:Number = this.currentTime/this.totalDuration * 360;
-			
+			CollisionManager.getInstance().processCollisions();
 			this.dispatchEvent( new Event( TweenEvent.UPDATE ) );
-			//mTimelineSprite.redrawTimelineCursor( this.currentTime );
 			
 		}
 		

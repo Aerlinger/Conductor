@@ -89,16 +89,14 @@ package com.element
 		/** Called when this Element is pressed */
 		private function onPressElement(Evt:MouseEvent) : void {
 			trace( this.toString() );
-			
-			Conductor.updateElementStatusTextInfo(this);
 		}
 		
 		/** Creates a copy of this element. */
 		override public function clone() : * {
-			var NewCircle:CircleElement = new CircleElement(this);
-			NewCircle.mRadius = this.mRadius;
+			var ClonedCircle:CircleElement = super.clone();
+			ClonedCircle.mRadius = this.mRadius;
 			
-			return NewCircle;
+			return ClonedCircle;
 		}
 		
 	}

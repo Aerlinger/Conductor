@@ -14,8 +14,7 @@ package com.anim
 	 * 
 	 * @author Anthony Erlinger
 	 */
-	public class TweenConductor extends TweenMax
-	{
+	public class TweenConductor extends TweenMax {
 		// Events will propagate to children only if this flag is set to true
 		protected var propagateEventsToChildren:Boolean = true;
 		
@@ -27,7 +26,7 @@ package com.anim
 		 */
 		public function TweenConductor(target:BaseElement, durationInBeats:Number, vars:Object )
 		{
-			super(target, Conductor.getTimeline().beatsToSeconds(durationInBeats), vars);
+			super(target, target.getTimeline().beatsToSeconds(durationInBeats), vars);
 			
 			vars.onUpdate 	= onUpdate;
 			vars.onStart 	= onStartTween;

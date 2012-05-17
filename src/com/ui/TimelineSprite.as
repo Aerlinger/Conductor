@@ -1,4 +1,4 @@
-package com.ui
+﻿package com.ui
 {
 	import com.anim.*;
 	import com.element.BaseElement;
@@ -13,8 +13,6 @@ package com.ui
 	import flash.events.MouseEvent;
 	import flash.text.TextField;
 	
-	import spark.components.Button;
-	
 	/** Singleton graphical class for the timeline. The top-left point of the screen should align with the top-left point of the stage. 
 	 * 
 	 * @author Anthony Erlinger
@@ -22,7 +20,7 @@ package com.ui
 	public class TimelineSprite extends Sprite {
 		
 		// constant dimensions for the timeline:
-		private var TIMELINE_WIDTH:Number = (.8 * Conductor.getWidth());
+		private var TIMELINE_WIDTH:Number = (.8 * stage.stageWidth);
 		private var TIMELINE_HEIGHT:Number = 30;
 		
 		private var TIMELINE_X:Number;
@@ -41,7 +39,8 @@ package com.ui
 		private var mStaticKeypointsTxt:TextField;
 		
 		// Time signature information
-		private var mTimeData:TimeSignatureData;
+		private var mTimeSignatureData:TimeSignatureData;
+		private var mMainTimeline:ConductorTimeline;
 		
 		private var mPauseButton:Sprite;
 		private var mPlayButton:Sprite;
@@ -52,13 +51,13 @@ package com.ui
 		
 		
 		/** Renders a new TimelineSprite */
-		public function TimelineSprite( pTimeData:TimeSignatureData ) { 
-			this.mTimeData 	= pTimeData;
+		public function TimelineSprite( pTimeData:TimeSignatureData, pMainTimeline:ConductorTimeline ) { 
+			this.mTimeSignatureData 	= pTimeData;
 			
-			TIMELINE_WIDTH = (.8*Conductor.getWidth());
+			TIMELINE_WIDTH = (.8*stage.width);
 			
-			TIMELINE_X = Conductor.getCenterX()-TIMELINE_WIDTH/2;
-			TIMELINE_Y = Conductor.getHeight()-2.5*TIMELINE_HEIGHT;
+			TIMELINE_X = stage.width/2-TIMELINE_WIDTH/2;
+			TIMELINE_Y = stage.height-2.5*TIMELINE_HEIGHT;
 			
 			this.name = "TimelineSpriteDefault";
 			
@@ -101,20 +100,16 @@ package com.ui
 		
 		private function onScrub(Evt:MouseEvent) : void {
 			
-			var TimelineRef:ConductorTimeline = Conductor.getTimeline();
-			
 			if(Evt.buttonDown) {
 				var percentage:Number = (Evt.stageX - TIMELINE_X) / TIMELINE_WIDTH;
-				TimelineRef.gotoAndStop( percentage * TimelineRef.duration );
+				mMainTimeline.gotoAndStop( percentage * mMainTimeline.duration );
 			}
 		}
 		
 		/** TODO: Doesn't seem to work for an unknown reason */
 		private function onScrubRelease(Evt:MouseEvent) : void {
-			var TimelineRef:ConductorTimeline = Conductor.getTimeline();
-			
-			TimelineRef.paused = false;
-			TimelineRef.resume();
+			mMainTimeline.paused = false;
+			mMainTimeline.resume();
 		}
 		
 		/** Initializes and places the text labels on this stage. */
@@ -185,8 +180,8 @@ package com.ui
 		/** Draw vertical tick marks indicate the timeline position of each beat and measure. */
 		private function drawBeatIntervals( ) : void {
 			
-			var numMeasures : Number 		=  mTimeData.getNumMeasures();
-			var numBeatsPerMeasure:Number 	= mTimeData.getNumBeatsPerMeasure();
+			var numMeasures : Number 		=  mTimeSignatureData.getNumMeasures();
+			var numBeatsPerMeasure:Number 	= mTimeSignatureData.getNumBeatsPerMeasure();
 			
 			// For each measure draw the measure line
 			for( var i:uint=0; i<numMeasures; i++ ) {
@@ -284,7 +279,7 @@ package com.ui
 		
 		/** Updates the position of the timeline cursor on the timeline */
 		public function redrawTimelineCursor( mTotalTimeElapsed:Number ) : void {
-			var timeFraction:Number = mTotalTimeElapsed / mTimeData.getTrackDurationSeconds();
+			var timeFraction:Number = mTotalTimeElapsed / mTimeSignatureData.getTrackDurationSeconds();
 			
 			mTimeCursor.x = timeFraction*(TIMELINE_WIDTH) % TIMELINE_WIDTH;
 		}
@@ -386,42 +381,30 @@ package com.ui
 		
 		private function onPressPlayBtn(Evt:MouseEvent) : void {
 			
-			var TimelineRef:ConductorTimeline = Conductor.getTimeline();
-			
-			TimelineRef.paused = false;
-			TimelineRef.reversed = false;
-			TimelineRef.resume();
+			mMainTimeline.paused = false;
+			mMainTimeline.reversed = false;
+			mMainTimeline.resume();
 		}
 		
 		private function onPressPauseBtn(Evt:MouseEvent) : void {
 			
-			var TimelineRef:ConductorTimeline = Conductor.getTimeline();
-			
-			TimelineRef.paused = true;
-			TimelineRef.pause();
+			mMainTimeline.paused = true;
+			mMainTimeline.pause();
 		}
 		
 		private function onPressReverseBtn(Evt:MouseEvent) : void {
-			
-			var TimelineRef:ConductorTimeline = Conductor.getTimeline();
-			
-			TimelineRef.paused = false;
-			TimelineRef.reversed = true;
-			TimelineRef.reverse(true);
+			mMainTimeline.paused = false;
+			mMainTimeline.reversed = true;
+			mMainTimeline.reverse(true);
 		}
 		
 		private function onPressStepForwardBtn(Evt:MouseEvent) : void {
 			
-			var TimelineRef:ConductorTimeline = Conductor.getTimeline();
-			
-			TimelineRef.gotoAndStop( TimelineRef.currentTime + 1/Conductor.getInstance().FPS );
+			mMainTimeline.gotoAndStop( mMainTimeline.currentTime + 1/stage.frameRate );
 		}
 		
 		private function onPressStepBackwardBtn(Evt:MouseEvent) : void {
-			
-			var TimelineRef:ConductorTimeline = Conductor.getTimeline();
-			
-			TimelineRef.gotoAndStop( TimelineRef.currentTime - 1/Conductor.getInstance().FPS );
+			mMainTimeline.gotoAndStop( mMainTimeline.currentTime - 1/stage.frameRate );
 		}
 		
 		public function getWidth() : Number {

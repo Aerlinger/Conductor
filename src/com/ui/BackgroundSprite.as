@@ -1,4 +1,4 @@
-
+﻿
 package com.ui
 {
 	import com.anim.*;
@@ -13,8 +13,6 @@ package com.ui
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.text.TextField;
-	
-	import mx.states.AddChild;
 	
 	
 	
@@ -47,15 +45,15 @@ package com.ui
 			
 			// Add sprite for the status of elements
 			mElementText = new ElementStatusSprite();
-			mElementText.x = Conductor.getWidth() - 300;
+			mElementText.x = stage.stageWidth/2 - 300;
 			mElementText.y = 20;
 			
 			//addChild(mElementText);
 			
 			// Add rotating playbar
 			mRotatingPlayBar = new BaseElement();
-			mRotatingPlayBar.x = Conductor.getCenterX();
-			mRotatingPlayBar.y = Conductor.getCenterY();
+			mRotatingPlayBar.x = stage.width/2;
+			mRotatingPlayBar.y = stage.height/2;
 			
 			mRotatingPlayBar.setPivotPointLocal(0, 0, true);
 			
@@ -74,7 +72,7 @@ package com.ui
 			mCursorPositionTxt = new TextField();
 			mCursorPositionTxt.textColor = 0xFFFFFF;
 			mCursorPositionTxt.selectable = false;
-			mCursorPositionTxt.x = Conductor.getWidth() - 150;
+			mCursorPositionTxt.x = stage.width/2 - 150;
 			mCursorPositionTxt.y = 2;
 			mCursorPositionTxt.text = "(,)";
 			addChild(mCursorPositionTxt);

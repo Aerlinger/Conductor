@@ -95,7 +95,7 @@ package com.element
 		
 		/** Creates an exact copy of this Rectangle Element */
 		override public function clone() : * {
-			return new RectangleElement(this);
+			return super.clone();
 		}
 	}
 }

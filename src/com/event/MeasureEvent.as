@@ -14,7 +14,7 @@ package com.event
 		public static const MEASURE_START:String = "measureStart";
 		public static const MEASURE_END:String 	 = "measureEnd";
 		
-		public function MeasureEvent(measureNum:uint, type:String, bubbles:Boolean=false, cancelable:Boolean=false) {
+		public function MeasureEvent(type:String, measureNum:uint, bubbles:Boolean=false, cancelable:Boolean=false) {
 			super(type, bubbles, cancelable);
 		}
 		
